@@ -3,6 +3,8 @@
 Interactive Shiny tutorial and sandbox, inspired by
 [learnGitBranching](https://github.com/pcottle/learnGitBranching).
 
+**Live demo:** https://alisadeghiaghili.github.io/learn-shiny/
+
 Pick **R** or **Python**. Work two parallel tracks:
 
 1. **Concept** — the reactive model as a living graph (UI / input / reactive / output)
