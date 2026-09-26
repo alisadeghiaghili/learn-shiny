@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LearnShiny</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles/main.css" />
+  </head>
+  <body data-mode="concept">
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span class="brand-name">LearnShiny</span>
+        </div>
+        <div id="lang-picker" class="lang-picker" role="group" aria-label="Language track"></div>
+        <nav id="track-tabs" class="track-tabs" aria-label="Track"></nav>
+        <button type="button" id="btn-sandbox" class="ghost-btn">Sandbox</button>
+      </header>
+
+      <aside class="sidebar">
+        <p class="sidebar-label">Levels</p>
+        <div id="level-list" class="level-list"></div>
+      </aside>
+
+      <section class="mission" id="mission"></section>
+
+      <section class="stage-panel">
+        <div id="stage-tabs" class="stage-tabs"></div>
+        <div id="stage" class="stage" data-view="graph"></div>
+      </section>
+
+      <section class="workbench">
+        <div class="editor-col">
+          <label class="field-label" for="editor">Code</label>
+          <textarea id="editor" class="editor" spellcheck="false" placeholder="Shiny code…"></textarea>
+        </div>
+        <div class="console-col">
+          <label class="field-label" for="console">Graph commands</label>
+          <textarea
+            id="console"
+            class="console"
+            spellcheck="false"
+            placeholder="node input x&#10;node output out&#10;edge x out"
+          ></textarea>
+          <div class="toolbar">
+            <button type="button" id="btn-run" class="primary-btn">Run</button>
+            <button type="button" id="btn-check" class="ok-btn">Check</button>
+            <button type="button" id="btn-undo" class="ghost-btn">Undo</button>
+            <button type="button" id="btn-reset" class="ghost-btn">Reset</button>
+            <button type="button" id="btn-hint" class="ghost-btn">Hint</button>
+            <button type="button" id="btn-solution" class="ghost-btn">Solution</button>
+            <button type="button" id="btn-export" class="ghost-btn">Export</button>
+            <span id="golf" class="golf"></span>
+          </div>
+          <p id="status" class="status" data-kind="idle"></p>
+        </div>
+      </section>
+    </div>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

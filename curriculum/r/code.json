@@ -1,0 +1,170 @@
+{
+  "lang": "r",
+  "track": "code",
+  "levels": [
+    {
+      "id": "code-01-hello-app",
+      "track": "code",
+      "title": "Hello app",
+      "goal": "Wire a complete minimal Shiny app in R.",
+      "body": "Every Shiny app is `shinyApp(ui, server)`.\nUI is a layout. Server is a function of (input, output, session).\nKeep the ids stable — they are the graph endpoints.",
+      "hint": "Need shinyApp(, textInput, textOutput, renderText, and a server function.",
+      "par": 5,
+      "startGraph": { "nodes": [], "edges": [] },
+      "targetGraph": {
+        "nodes": [
+          { "id": "n", "kind": "input", "label": "n" },
+          { "id": "greeting", "kind": "output", "label": "greeting" }
+        ],
+        "edges": [{ "from": "n", "to": "greeting" }]
+      },
+      "starterCode": "library(shiny)\n\nui <- fluidPage(\n  # add a textInput with id \"n\"\n  # add textOutput(\"greeting\")\n)\n\nserver <- function(input, output, session) {\n  # render greeting\n}\n\nshinyApp(ui, server)\n",
+      "checks": [
+        { "type": "contains", "value": "shinyApp(" },
+        { "type": "contains", "value": "textInput" },
+        { "type": "contains", "value": "\"n\"" },
+        { "type": "contains", "value": "textOutput" },
+        { "type": "contains", "value": "greeting" },
+        { "type": "contains", "value": "renderText" },
+        { "type": "contains", "value": "function(input" }
+      ],
+      "solution": "library(shiny)\n\nui <- fluidPage(\n  textInput(\"n\", \"Your name\", \"world\"),\n  textOutput(\"greeting\")\n)\n\nserver <- function(input, output, session) {\n  output$greeting <- renderText({\n    paste0(\"Hello, \", input$n, \"!\")\n  })\n}\n\nshinyApp(ui, server)\n"
+    },
+    {
+      "id": "code-02-slider-text",
+      "track": "code",
+      "title": "Slider drives text",
+      "goal": "Read a slider and print a formatted result.",
+      "body": "Inputs are reactive values: `input$x`.\nOutputs are `render*` assigned to `output$...`.",
+      "hint": "sliderInput(\"x\", ...) and renderText that uses input$x.",
+      "par": 4,
+      "startGraph": {
+        "nodes": [{ "id": "x", "kind": "input", "label": "x" }],
+        "edges": []
+      },
+      "targetGraph": {
+        "nodes": [
+          { "id": "x", "kind": "input", "label": "x" },
+          { "id": "out", "kind": "output", "label": "out" }
+        ],
+        "edges": [{ "from": "x", "to": "out" }]
+      },
+      "starterCode": "library(shiny)\n\nui <- fluidPage(\n  sliderInput(\"x\", \"X\", 0, 100, 10),\n  textOutput(\"out\")\n)\n\nserver <- function(input, output, session) {\n  # make out report the square of x\n}\n\nshinyApp(ui, server)\n",
+      "checks": [
+        { "type": "contains", "value": "output$out" },
+        { "type": "contains", "value": "input$x" },
+        { "type": "contains", "value": "renderText" },
+        { "type": "regex", "value": "input\\$x\\s*\\*\\s*input\\$x|input\\$x\\s*\\^\\s*2" }
+      ],
+      "solution": "server <- function(input, output, session) {\n  output$out <- renderText({\n    paste(\"x² =\", input$x * input$x)\n  })\n}\n"
+    },
+    {
+      "id": "code-03-reactive-calc",
+      "track": "code",
+      "title": "Share work with a reactive",
+      "goal": "Put the math in `reactive()` and use it from two outputs.",
+      "body": "`reactive({ ... })` caches until inputs change.\nBoth outputs read the same node — no duplicated formula.",
+      "hint": "y <- reactive({ input$x * 2 }), then y() in both renders.",
+      "par": 5,
+      "startGraph": {
+        "nodes": [
+          { "id": "x", "kind": "input", "label": "x" },
+          { "id": "out", "kind": "output", "label": "out" },
+          { "id": "out2", "kind": "output", "label": "out2" }
+        ],
+        "edges": [
+          { "from": "x", "to": "out" },
+          { "from": "x", "to": "out2" }
+        ]
+      },
+      "targetGraph": {
+        "nodes": [
+          { "id": "x", "kind": "input", "label": "x" },
+          { "id": "y", "kind": "reactive", "label": "y" },
+          { "id": "out", "kind": "output", "label": "out" },
+          { "id": "out2", "kind": "output", "label": "out2" }
+        ],
+        "edges": [
+          { "from": "x", "to": "y" },
+          { "from": "y", "to": "out" },
+          { "from": "y", "to": "out2" }
+        ]
+      },
+      "starterCode": "library(shiny)\n\nui <- fluidPage(\n  numericInput(\"x\", \"X\", 1),\n  textOutput(\"out\"),\n  textOutput(\"out2\")\n)\n\nserver <- function(input, output, session) {\n  # add reactive y = x * 2\n  output$out <- renderText({\n    paste(\"y =\", input$x * 2)\n  })\n  output$out2 <- renderText({\n    paste(\"y again =\", input$x * 2)\n  })\n}\n\nshinyApp(ui, server)\n",
+      "checks": [
+        { "type": "contains", "value": "reactive(" },
+        { "type": "notContains", "value": "y =\", input$x * 2" },
+        { "type": "regex", "value": "y\\(\\)[\\s\\S]*y\\(\\)" }
+      ],
+      "solution": "server <- function(input, output, session) {\n  y <- reactive({\n    input$x * 2\n  })\n  output$out <- renderText({\n    paste(\"y =\", y())\n  })\n  output$out2 <- renderText({\n    paste(\"y again =\", y())\n  })\n}\n"
+    },
+    {
+      "id": "code-04-action-button",
+      "track": "code",
+      "title": "Commit on button press",
+      "goal": "Use eventReactive so text updates only when the button is pressed.",
+      "body": "Sliders fire on every move. Actions should wait for a click.\n`eventReactive(input$go, ...)` freezes the dependency edge until the event fires.",
+      "hint": "eventReactive(input$go, { input$x }).",
+      "par": 4,
+      "startGraph": {
+        "nodes": [
+          { "id": "x", "kind": "input", "label": "x" },
+          { "id": "go", "kind": "input", "label": "go" },
+          { "id": "out", "kind": "output", "label": "out" }
+        ],
+        "edges": [
+          { "from": "x", "to": "out" },
+          { "from": "go", "to": "out" }
+        ]
+      },
+      "targetGraph": {
+        "nodes": [
+          { "id": "x", "kind": "input", "label": "x" },
+          { "id": "go", "kind": "input", "label": "go" },
+          { "id": "snap", "kind": "reactive", "label": "snap" },
+          { "id": "out", "kind": "output", "label": "out" }
+        ],
+        "edges": [
+          { "from": "go", "to": "snap" },
+          { "from": "x", "to": "snap" },
+          { "from": "snap", "to": "out" }
+        ]
+      },
+      "starterCode": "library(shiny)\n\nui <- fluidPage(\n  sliderInput(\"x\", \"X\", 0, 10, 1),\n  actionButton(\"go\", \"Commit\"),\n  textOutput(\"out\")\n)\n\nserver <- function(input, output, session) {\n  # out should only update when go is pressed\n  output$out <- renderText({\n    paste(\"x =\", input$x)\n  })\n}\n\nshinyApp(ui, server)\n",
+      "checks": [
+        { "type": "contains", "value": "eventReactive" },
+        { "type": "contains", "value": "input$go" }
+      ],
+      "solution": "server <- function(input, output, session) {\n  snap <- eventReactive(input$go, {\n    input$x\n  })\n  output$out <- renderText({\n    paste(\"x =\", snap())\n  })\n}\n"
+    },
+    {
+      "id": "code-05-req-guard",
+      "track": "code",
+      "title": "Guard with req",
+      "goal": "Stop output errors when the text input is empty.",
+      "body": "`req(...)` raises a silent cancel when its arguments are falsy.\nUse it at the top of an output instead of nested if-statements.",
+      "hint": "req(input$n) before formatting.",
+      "par": 2,
+      "startGraph": {
+        "nodes": [
+          { "id": "n", "kind": "input", "label": "n" },
+          { "id": "out", "kind": "output", "label": "out" }
+        ],
+        "edges": [{ "from": "n", "to": "out" }]
+      },
+      "targetGraph": {
+        "nodes": [
+          { "id": "n", "kind": "input", "label": "n" },
+          { "id": "out", "kind": "output", "label": "out" }
+        ],
+        "edges": [{ "from": "n", "to": "out" }]
+      },
+      "starterCode": "library(shiny)\n\nui <- fluidPage(\n  textInput(\"n\", \"Name\", \"\"),\n  textOutput(\"out\")\n)\n\nserver <- function(input, output, session) {\n  output$out <- renderText({\n    paste0(\"Hello, \", toupper(input$n), \"!\")\n  })\n}\n\nshinyApp(ui, server)\n",
+      "checks": [
+        { "type": "contains", "value": "req(" },
+        { "type": "contains", "value": "input$n" }
+      ],
+      "solution": "server <- function(input, output, session) {\n  output$out <- renderText({\n    req(input$n)\n    paste0(\"Hello, \", toupper(input$n), \"!\")\n  })\n}\n"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "learn-shiny",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Interactive Shiny tutorial and sandbox (R + Python), inspired by learnGitBranching",
+  "type": "module",
+  "scripts": {
+    "test": "node web/src/graph.checks.test.mjs && node web/src/solutions.test.mjs",
+    "dev": "python -m http.server 5173"
+  }
+}

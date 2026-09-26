@@ -1,0 +1,227 @@
+{
+  "lang": "python",
+  "track": "concept",
+  "levels": [
+    {
+      "id": "c-01-two-halves",
+      "track": "concept",
+      "title": "Two halves",
+      "goal": "Build a graph with one input and one output, wired through server.",
+      "body": "A Shiny app has two halves.\nUI declares widgets and placeholders. Server fills those placeholders from data.\nNothing is magic: every output is computed from inputs and reactives.",
+      "hint": "Add an input node named x, an output node named out, then connect them.",
+      "par": 3,
+      "startGraph": { "nodes": [], "edges": [] },
+      "targetGraph": {
+        "nodes": [
+          { "id": "x", "kind": "input", "label": "x" },
+          { "id": "out", "kind": "output", "label": "out" }
+        ],
+        "edges": [{ "from": "x", "to": "out" }]
+      },
+      "starterCode": "",
+      "checks": [
+        {
+          "type": "graphMatch",
+          "value": {
+            "nodes": [
+              { "id": "x", "kind": "input" },
+              { "id": "out", "kind": "output" }
+            ],
+            "edges": [{ "from": "x", "to": "out" }]
+          }
+        }
+      ],
+      "solution": "node input x\nnode output out\nedge x out",
+      "sample": "from shiny import App, ui, render\n\napp_ui = ui.page_sidebar(\n    ui.sidebar(ui.input_slider(\"x\", \"X\", 0, 10, 1)),\n    ui.output_text(\"out\"),\n)\n\ndef server(input, output, session):\n    @output\n    @render.text\n    def out():\n        return f\"x is {input.x()}\"\n\napp = App(app_ui, server)"
+    },
+    {
+      "id": "c-02-reactive-pipe",
+      "track": "concept",
+      "title": "The reactive pipe",
+      "goal": "Insert a reactive between input and output.",
+      "body": "Outputs should stay thin. Put shared math in a reactive expression.\nIt recomputes only when its dependencies change, then feeds every consumer.",
+      "hint": "node reactive y — then edge x→y and y→out.",
+      "par": 5,
+      "startGraph": {
+        "nodes": [
+          { "id": "x", "kind": "input", "label": "x" },
+          { "id": "out", "kind": "output", "label": "out" }
+        ],
+        "edges": [{ "from": "x", "to": "out" }]
+      },
+      "targetGraph": {
+        "nodes": [
+          { "id": "x", "kind": "input", "label": "x" },
+          { "id": "y", "kind": "reactive", "label": "y" },
+          { "id": "out", "kind": "output", "label": "out" }
+        ],
+        "edges": [
+          { "from": "x", "to": "y" },
+          { "from": "y", "to": "out" }
+        ]
+      },
+      "starterCode": "",
+      "checks": [
+        {
+          "type": "graphMatch",
+          "value": {
+            "nodes": [
+              { "id": "x", "kind": "input" },
+              { "id": "y", "kind": "reactive" },
+              { "id": "out", "kind": "output" }
+            ],
+            "edges": [
+              { "from": "x", "to": "y" },
+              { "from": "y", "to": "out" }
+            ]
+          }
+        }
+      ],
+      "solution": "edge-del x out\nnode reactive y\nedge x y\nedge y out",
+      "sample": "import reactive\n\n@reactive.calc\ndef y():\n    return input.x() * 2\n\n@output\n@render.text\ndef out():\n    return f\"y is {y()}\""
+    },
+    {
+      "id": "c-03-two-consumers",
+      "track": "concept",
+      "title": "One reactive, many consumers",
+      "goal": "Fan one reactive into two outputs without duplicating the math.",
+      "body": "When two outputs need the same value, do not copy the formula.\nOne reactive, two edges out. Invalidation stays automatic.",
+      "hint": "Keep y. Add out2 and edge y→out2.",
+      "par": 3,
+      "startGraph": {
+        "nodes": [
+          { "id": "x", "kind": "input", "label": "x" },
+          { "id": "y", "kind": "reactive", "label": "y" },
+          { "id": "out", "kind": "output", "label": "out" }
+        ],
+        "edges": [
+          { "from": "x", "to": "y" },
+          { "from": "y", "to": "out" }
+        ]
+      },
+      "targetGraph": {
+        "nodes": [
+          { "id": "x", "kind": "input", "label": "x" },
+          { "id": "y", "kind": "reactive", "label": "y" },
+          { "id": "out", "kind": "output", "label": "out" },
+          { "id": "out2", "kind": "output", "label": "out2" }
+        ],
+        "edges": [
+          { "from": "x", "to": "y" },
+          { "from": "y", "to": "out" },
+          { "from": "y", "to": "out2" }
+        ]
+      },
+      "starterCode": "",
+      "checks": [
+        {
+          "type": "graphMatch",
+          "value": {
+            "nodes": [
+              { "id": "y", "kind": "reactive" },
+              { "id": "out2", "kind": "output" }
+            ],
+            "edges": [
+              { "from": "y", "to": "out" },
+              { "from": "y", "to": "out2" }
+            ]
+          }
+        }
+      ],
+      "solution": "node output out2\nedge y out2",
+      "sample": "@output\n@render.text\ndef out2():\n    return f\"twice y is {y() * 2}\""
+    },
+    {
+      "id": "c-04-observer",
+      "track": "concept",
+      "title": "Observers are not the data path",
+      "goal": "Add an observer that watches x but does not feed an output.",
+      "body": "Observers run for side effects: logs, writes, notifications.\nThey are not cached values. Never wire an observer as the source of an output.",
+      "hint": "node observer log — edge x→log only. No edge into out from log.",
+      "par": 2,
+      "startGraph": {
+        "nodes": [
+          { "id": "x", "kind": "input", "label": "x" },
+          { "id": "out", "kind": "output", "label": "out" }
+        ],
+        "edges": [{ "from": "x", "to": "out" }]
+      },
+      "targetGraph": {
+        "nodes": [
+          { "id": "x", "kind": "input", "label": "x" },
+          { "id": "out", "kind": "output", "label": "out" },
+          { "id": "log", "kind": "observer", "label": "log" }
+        ],
+        "edges": [
+          { "from": "x", "to": "out" },
+          { "from": "x", "to": "log" }
+        ]
+      },
+      "starterCode": "",
+      "checks": [
+        {
+          "type": "graphMatch",
+          "value": {
+            "nodes": [{ "id": "log", "kind": "observer" }],
+            "edges": [{ "from": "x", "to": "log" }]
+          }
+        },
+        { "type": "graphNoEdge", "value": { "from": "log", "to": "out" } }
+      ],
+      "solution": "node observer log\nedge x log",
+      "sample": "@reactive.effect\ndef log():\n    print(\"x is now\", input.x())"
+    },
+    {
+      "id": "c-05-isolate",
+      "track": "concept",
+      "title": "Break a dependency with isolate",
+      "goal": "Keep x→out, but read a value from n without taking a dependency on n.",
+      "body": "reactive.value n feeds observer clear.\nIf out also reads n, out would re-run every time n changes.\nUse isolate so out only re-runs when x changes.",
+      "hint": "Edge n→clear and n→iso, but do NOT edge n→out. iso is a reactive marked as isolated read.",
+      "par": 4,
+      "startGraph": {
+        "nodes": [
+          { "id": "x", "kind": "input", "label": "x" },
+          { "id": "n", "kind": "input", "label": "n" },
+          { "id": "out", "kind": "output", "label": "out" },
+          { "id": "clear", "kind": "observer", "label": "clear" }
+        ],
+        "edges": [
+          { "from": "x", "to": "out" },
+          { "from": "n", "to": "clear" }
+        ]
+      },
+      "targetGraph": {
+        "nodes": [
+          { "id": "x", "kind": "input", "label": "x" },
+          { "id": "n", "kind": "input", "label": "n" },
+          { "id": "out", "kind": "output", "label": "out" },
+          { "id": "clear", "kind": "observer", "label": "clear" },
+          { "id": "iso", "kind": "reactive", "label": "iso" }
+        ],
+        "edges": [
+          { "from": "x", "to": "out" },
+          { "from": "iso", "to": "out" },
+          { "from": "n", "to": "clear" },
+          { "from": "n", "to": "iso" }
+        ]
+      },
+      "starterCode": "",
+      "checks": [
+        {
+          "type": "graphMatch",
+          "value": {
+            "nodes": [{ "id": "iso", "kind": "reactive" }],
+            "edges": [
+              { "from": "n", "to": "iso" },
+              { "from": "iso", "to": "out" }
+            ]
+          }
+        },
+        { "type": "graphNoEdge", "value": { "from": "n", "to": "out" } }
+      ],
+      "solution": "node reactive iso\nedge n iso\nedge iso out",
+      "sample": "from shiny import reactive\n\n@output\n@render.text\ndef out():\n    # n is isolated — changing n does not re-run this\n    return f\"{input.x()} / {reactive.isolate(input.n())}\""
+    }
+  ]
+}

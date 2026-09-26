@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+.Rhistory
+.RData
+.Rproj.user/
+_site/
+node_modules/
+.venv/
+venv/
+*.log

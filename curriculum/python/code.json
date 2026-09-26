@@ -1,0 +1,172 @@
+{
+  "lang": "python",
+  "track": "code",
+  "levels": [
+    {
+      "id": "code-01-hello-app",
+      "track": "code",
+      "title": "Hello app",
+      "goal": "Wire a complete minimal Shiny app in Python.",
+      "body": "Every Shiny for Python app is `App(ui, server)`.\nUI is a layout. Server is a function of (input, output, session).\nKeep the ids stable — they are the graph endpoints.",
+      "hint": "Need App(, input_slider, output_text, render.text, and def server.",
+      "par": 5,
+      "startGraph": { "nodes": [], "edges": [] },
+      "targetGraph": {
+        "nodes": [
+          { "id": "n", "kind": "input", "label": "n" },
+          { "id": "greeting", "kind": "output", "label": "greeting" }
+        ],
+        "edges": [{ "from": "n", "to": "greeting" }]
+      },
+      "starterCode": "from shiny import App, ui, render\n\napp_ui = ui.page_sidebar(\n    ui.sidebar(\n        # add an input_text with id \"n\"\n    ),\n    # add output_text(\"greeting\")\n)\n\ndef server(input, output, session):\n    # render greeting\n    pass\n\napp = App(app_ui, server)\n",
+      "checks": [
+        { "type": "contains", "value": "App(" },
+        { "type": "contains", "value": "input_text" },
+        { "type": "contains", "value": "\"n\"" },
+        { "type": "contains", "value": "output_text" },
+        { "type": "contains", "value": "greeting" },
+        { "type": "contains", "value": "render.text" },
+        { "type": "contains", "value": "def server" }
+      ],
+      "solution": "from shiny import App, ui, render\n\napp_ui = ui.page_sidebar(\n    ui.sidebar(\n        ui.input_text(\"n\", \"Your name\", \"world\"),\n    ),\n    ui.output_text(\"greeting\"),\n)\n\ndef server(input, output, session):\n    @output\n    @render.text\n    def greeting():\n        return f\"Hello, {input.n()}!\"\n\napp = App(app_ui, server)\n"
+    },
+    {
+      "id": "code-02-slider-text",
+      "track": "code",
+      "title": "Slider drives text",
+      "goal": "Read a slider and print a formatted result.",
+      "body": "Inputs are callable: `input.x()`.\nOutputs are functions decorated with `@render.*` and registered with `@output`.",
+      "hint": "input_slider(\"x\", ...) and @render.text that returns a string using input.x().",
+      "par": 4,
+      "startGraph": {
+        "nodes": [{ "id": "x", "kind": "input", "label": "x" }],
+        "edges": []
+      },
+      "targetGraph": {
+        "nodes": [
+          { "id": "x", "kind": "input", "label": "x" },
+          { "id": "out", "kind": "output", "label": "out" }
+        ],
+        "edges": [{ "from": "x", "to": "out" }]
+      },
+      "starterCode": "from shiny import App, ui, render\n\napp_ui = ui.page_sidebar(\n    ui.sidebar(\n        ui.input_slider(\"x\", \"X\", 0, 100, 10),\n    ),\n    ui.output_text(\"out\"),\n)\n\ndef server(input, output, session):\n    # make out report the square of x\n    pass\n\napp = App(app_ui, server)\n",
+      "checks": [
+        { "type": "contains", "value": "def out" },
+        { "type": "contains", "value": "input.x()" },
+        { "type": "regex", "value": "input\\.x\\(\\)\\s*\\*\\s*input\\.x\\(\\)|input\\.x\\(\\)\\s*\\*\\s*input\\.x\\(\\)|\\*\\s*2|x\\(\\)\\s*\\*" },
+        { "type": "contains", "value": "render.text" }
+      ],
+      "solution": "def server(input, output, session):\n    @output\n    @render.text\n    def out():\n        return f\"x² = {input.x() * input.x()}\"\n"
+    },
+    {
+      "id": "code-03-reactive-calc",
+      "track": "code",
+      "title": "Share work with a reactive",
+      "goal": "Put the math in `@reactive.calc` and use it from two outputs.",
+      "body": "`@reactive.calc` caches until inputs change.\nBoth outputs read the same node — no duplicated formula.",
+      "hint": "Define `def y():` with `@reactive.calc`, then use y() in both renders.",
+      "par": 5,
+      "startGraph": {
+        "nodes": [
+          { "id": "x", "kind": "input", "label": "x" },
+          { "id": "out", "kind": "output", "label": "out" },
+          { "id": "out2", "kind": "output", "label": "out2" }
+        ],
+        "edges": [
+          { "from": "x", "to": "out" },
+          { "from": "x", "to": "out2" }
+        ]
+      },
+      "targetGraph": {
+        "nodes": [
+          { "id": "x", "kind": "input", "label": "x" },
+          { "id": "y", "kind": "reactive", "label": "y" },
+          { "id": "out", "kind": "output", "label": "out" },
+          { "id": "out2", "kind": "output", "label": "out2" }
+        ],
+        "edges": [
+          { "from": "x", "to": "y" },
+          { "from": "y", "to": "out" },
+          { "from": "y", "to": "out2" }
+        ]
+      },
+      "starterCode": "from shiny import App, ui, render, reactive\n\napp_ui = ui.page_sidebar(\n    ui.sidebar(ui.input_numeric(\"x\", \"X\", 1)),\n    ui.output_text(\"out\"),\n    ui.output_text(\"out2\"),\n)\n\ndef server(input, output, session):\n    # add reactive y = x * 2\n    @output\n    @render.text\n    def out():\n        return f\"y = {input.x() * 2}\"\n\n    @output\n    @render.text\n    def out2():\n        return f\"y again = {input.x() * 2}\"\n\napp = App(app_ui, server)\n",
+      "checks": [
+        { "type": "contains", "value": "reactive.calc" },
+        { "type": "contains", "value": "def y" },
+        { "type": "notContains", "value": "y = {input.x() * 2}" },
+        { "type": "notContains", "value": "y again = {input.x() * 2}" },
+        { "type": "regex", "value": "y\\(\\)[\\s\\S]*y\\(\\)" }
+      ],
+      "solution": "def server(input, output, session):\n    @reactive.calc\n    def y():\n        return input.x() * 2\n\n    @output\n    @render.text\n    def out():\n        return f\"y = {y()}\"\n\n    @output\n    @render.text\n    def out2():\n        return f\"y again = {y()}\"\n"
+    },
+    {
+      "id": "code-04-action-button",
+      "track": "code",
+      "title": "Commit on button press",
+      "goal": "Use eventReactive so text updates only when the button is pressed.",
+      "body": "Sliders fire on every move. Actions should wait for a click.\n`@reactive.event(input.go)` freezes the dependency edge until the event fires.",
+      "hint": "@reactive.event(input.go) on a calc that reads input.x().",
+      "par": 4,
+      "startGraph": {
+        "nodes": [
+          { "id": "x", "kind": "input", "label": "x" },
+          { "id": "go", "kind": "input", "label": "go" },
+          { "id": "out", "kind": "output", "label": "out" }
+        ],
+        "edges": [
+          { "from": "x", "to": "out" },
+          { "from": "go", "to": "out" }
+        ]
+      },
+      "targetGraph": {
+        "nodes": [
+          { "id": "x", "kind": "input", "label": "x" },
+          { "id": "go", "kind": "input", "label": "go" },
+          { "id": "snap", "kind": "reactive", "label": "snap" },
+          { "id": "out", "kind": "output", "label": "out" }
+        ],
+        "edges": [
+          { "from": "go", "to": "snap" },
+          { "from": "x", "to": "snap" },
+          { "from": "snap", "to": "out" }
+        ]
+      },
+      "starterCode": "from shiny import App, ui, render, reactive\n\napp_ui = ui.page_sidebar(\n    ui.sidebar(\n        ui.input_slider(\"x\", \"X\", 0, 10, 1),\n        ui.input_action_button(\"go\", \"Commit\"),\n    ),\n    ui.output_text(\"out\"),\n)\n\ndef server(input, output, session):\n    # out should only update when go is pressed\n    @output\n    @render.text\n    def out():\n        return f\"x = {input.x()}\"\n\napp = App(app_ui, server)\n",
+      "checks": [
+        { "type": "contains", "value": "reactive.event" },
+        { "type": "contains", "value": "input.go" }
+      ],
+      "solution": "def server(input, output, session):\n    @reactive.calc\n    @reactive.event(input.go)\n    def snap():\n        return input.x()\n\n    @output\n    @render.text\n    def out():\n        return f\"x = {snap()}\"\n"
+    },
+    {
+      "id": "code-05-req-guard",
+      "track": "code",
+      "title": "Guard with req",
+      "goal": "Stop output errors when the text input is empty.",
+      "body": "`req(...)` raises a silent cancel when its arguments are falsy.\nUse it at the top of an output instead of nested if-statements.",
+      "hint": "req(input.n()) before formatting.",
+      "par": 2,
+      "startGraph": {
+        "nodes": [
+          { "id": "n", "kind": "input", "label": "n" },
+          { "id": "out", "kind": "output", "label": "out" }
+        ],
+        "edges": [{ "from": "n", "to": "out" }]
+      },
+      "targetGraph": {
+        "nodes": [
+          { "id": "n", "kind": "input", "label": "n" },
+          { "id": "out", "kind": "output", "label": "out" }
+        ],
+        "edges": [{ "from": "n", "to": "out" }]
+      },
+      "starterCode": "from shiny import App, ui, render, reactive\n\napp_ui = ui.page_sidebar(\n    ui.sidebar(ui.input_text(\"n\", \"Name\", \"\")),\n    ui.output_text(\"out\"),\n)\n\ndef server(input, output, session):\n    @output\n    @render.text\n    def out():\n        return f\"Hello, {input.n().upper()}!\"\n\napp = App(app_ui, server)\n",
+      "checks": [
+        { "type": "contains", "value": "req(" },
+        { "type": "contains", "value": "input.n()" }
+      ],
+      "solution": "def server(input, output, session):\n    @output\n    @render.text\n    def out():\n        req(input.n())\n        return f\"Hello, {input.n().upper()}!\"\n"
+    }
+  ]
+}
